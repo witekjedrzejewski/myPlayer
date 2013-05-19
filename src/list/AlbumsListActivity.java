@@ -12,7 +12,7 @@ abstract public class AlbumsListActivity extends ItemsListActivity {
 	@Override
 	protected Class<?> getNextActivity() {
 		Log.i(TAG, "getNextActivity()");
-		return SongsListActivity.class;
+		return SongsFromAlbumListActivity.class;
 	}
 
 	protected String[] getFrom() {

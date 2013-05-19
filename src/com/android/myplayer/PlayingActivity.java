@@ -212,7 +212,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 			
 			@Override
 			public void onClick(View arg0) {
-				Intent i = new Intent(getApplicationContext(), ArtistsListActivity.class);
+				Intent i = new Intent(getApplicationContext(), MainActivity.class);
 				startActivityForResult(i, 100);			
 			}
 		});

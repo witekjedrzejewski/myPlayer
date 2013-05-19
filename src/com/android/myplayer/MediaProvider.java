@@ -67,7 +67,7 @@ public class MediaProvider {
 		this.contentResolver = contentResolver;
 	}
 	
-	public ArrayList<Song> getSongs(String filter, long arg) {
+	public ArrayList<Song> getSongs(String filter, Long arg) {
 		Log.i(TAG, filter + " " + arg);
 		if (filter.equals(ALL_FILTER)) return getAllSongs();
 		if (filter.equals(ARTIST_FILTER)) return getSongsFromArtist(arg);

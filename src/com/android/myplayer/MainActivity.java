@@ -1,17 +1,16 @@
 package com.android.myplayer;
 
-import list.AlbumsListActivity;
+import list.AllAlbumsListActivity;
+import list.AllSongsListActivity;
 import list.ArtistsListActivity;
-import list.SongsListActivity;
-
-import com.androidhive.musicplayer.R;
-
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TabHost;
+
+import com.androidhive.musicplayer.R;
 
 public class MainActivity extends TabActivity {
 
@@ -41,13 +40,13 @@ public class MainActivity extends TabActivity {
 	    tabHost.addTab(spec);
 
 	    // Do the same for the other tabs
-	    intent = new Intent().setClass(this, AlbumsListActivity.class);
+	    intent = new Intent().setClass(this, AllAlbumsListActivity.class);
 	    spec = tabHost.newTabSpec("albums").setIndicator("Albums",
 	                      res.getDrawable(R.drawable.ic_tab_albums))
 	                  .setContent(intent);
 	    tabHost.addTab(spec);
 
-	    intent = new Intent().setClass(this, SongsListActivity.class);
+	    intent = new Intent().setClass(this, AllSongsListActivity.class);
 	    spec = tabHost.newTabSpec("songs").setIndicator("Songs",
 	                      res.getDrawable(R.drawable.ic_tab_songs))
 	                  .setContent(intent);

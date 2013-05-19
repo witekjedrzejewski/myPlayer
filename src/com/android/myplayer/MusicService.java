@@ -235,6 +235,13 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     	}
     }
     
+    private void assertUnregistered(BroadcastReceiver r, boolean isRegistered) {
+    	if (isRegistered) {
+    		unregisterReceiver(r);
+    		isRegistered = false;
+    	}
+    }
+    
     private void setupHandler() {
     	Log.i("SETUP HANDLER", "go");
     	handler.removeCallbacks(sendUpdatesToUI);
@@ -516,7 +523,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         mNotification.tickerText = text;
         mNotification.icon = R.drawable.ic_stat_playing;
         mNotification.flags |= Notification.FLAG_ONGOING_EVENT;
-        mNotification.setLatestEventInfo(getApplicationContext(), "RandomMusicPlayer",
+        mNotification.setLatestEventInfo(getApplicationContext(), "MyMusicPlayer",
                 text, pi);
         startForeground(NOTIFICATION_ID, mNotification);
     }
@@ -562,9 +569,9 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         relaxResources(true);
         giveUpAudioFocus();
         handler.removeCallbacks(sendUpdatesToUI);
-        unregisterReceiver(seekPosBroadcastReceiver);
-        unregisterReceiver(repeatBroadcastReceiver);
-        unregisterReceiver(shuffleBroadcastReceiver);
+        assertUnregistered(seekPosBroadcastReceiver, isSeekPosBroadcastReceiverRegistered);
+        assertUnregistered(repeatBroadcastReceiver, isRepeatBroadcastReceiverRegistered);
+        assertUnregistered(shuffleBroadcastReceiver, isShuffleBroadcastReceiverRegistered);
     }
 
     @Override

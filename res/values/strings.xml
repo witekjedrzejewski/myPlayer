@@ -13,5 +13,10 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_artists_songs_list">ArtistsSongsListActivity</string>
     <string name="title_activity_all_albums_list">AllAlbumsListActivity</string>
-
+    <string name="title_activity_all_songs_list">All songs</string>
+    <string name="title_activity_albums_from_artist_list">Artist\'s albums</string>
+    <string name="title_activity_songs_from_artist_list">Artist\'s songs</string>
+    <string name="title_activity_songs_from_album_list">Songs from album</string>
+	<string name="title_activity_from_artist_tab">Artist view</string>
+    
 </resources>

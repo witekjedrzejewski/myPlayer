@@ -34,6 +34,13 @@
             android:layout_height="fill_parent"
             android:src="@drawable/btn_playlist"
             android:background="@null"/>
+        
+        <ImageButton 
+            android:id="@+id/btnTag"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:src="@drawable/btn_tag"
+            android:background="@null"/>
     </LinearLayout>
     
     <!-- Song Thumbnail Image -->

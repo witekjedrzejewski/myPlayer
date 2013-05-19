@@ -1,6 +1,8 @@
 package list;
 
 
+import com.android.myplayer.FromArtistTabActivity;
+
 import android.content.Intent;
 import android.database.Cursor;
 import android.provider.MediaStore.Audio;
@@ -19,7 +21,7 @@ public class ArtistsListActivity extends ItemsListActivity {
 	@Override
 	protected Class<?> getNextActivity() {
 		Log.i(tag, "getNextActivity()");
-		return AlbumsListActivity.class;
+		return FromArtistTabActivity.class;
 	}
 
 	@Override

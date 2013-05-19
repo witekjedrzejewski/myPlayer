@@ -25,7 +25,7 @@ public class Playlist {
 		Log.i(TAG, "creating");
 		MediaProvider provider = new MediaProvider(contentResolver);
 		String filter = (String) extras.get(MediaProvider.FILTER);
-		long arg = (Long) extras.get(MediaProvider.ARG);
+		Long arg = (Long) extras.get(MediaProvider.ARG);
 		currentSongIndex = (Integer) extras.get("position");
 		Log.i(TAG, filter + " " + arg);
 		songs = provider.getSongs(filter, arg);

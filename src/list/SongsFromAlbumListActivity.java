@@ -1,12 +1,20 @@
 package list;
 
 
-import com.android.myplayer.MediaProvider;
-
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.android.myplayer.MediaProvider;
 
 public class SongsFromAlbumListActivity extends SongsListActivity {
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		Log.i("cos", "songs from album create");
+		super.onCreate(savedInstanceState);
+	}
 	
 	@Override
 	protected Cursor getCursor() {
