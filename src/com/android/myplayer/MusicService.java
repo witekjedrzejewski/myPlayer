@@ -56,23 +56,10 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     // The tag we put on debug messages
     final static String TAG = "MusicService";
 
-    // These are the Intent actions that we are prepared to handle. Notice that the fact these
-    // constants exist in our class is a mere convenience: what really defines the actions our
-    // service can handle are the <action> tags in the <intent-filters> tag for our service in
-    // AndroidManifest.xml.
-    public static final String ACTION_CHANGE_PLAYLIST = "com.android.myplayer.action.CHANGE_PLAYLIST";
-    public static final String ACTION_TOGGLE_PLAYBACK = "com.android.myplayer.action.TOGGLE_PLAYBACK";
-    public static final String ACTION_PLAY = "com.android.myplayer.action.PLAY";
-    public static final String ACTION_PAUSE = "com.android.myplayer.action.PAUSE";
-    public static final String ACTION_STOP = "com.android.myplayer.action.STOP";
-    public static final String ACTION_SKIP = "com.android.myplayer.action.SKIP";
-    public static final String ACTION_PREVIOUS = "com.android.myplayer.action.PREVIOUS";
-    public static final String ACTION_FORWARD = "com.android.myplayer.action.FORWARD";
-    public static final String ACTION_BACKWARD = "com.android.myplayer.action.BACKWARD";
-
     public static final String EXTRA_TITLE = "com.android.myplayer.MusicService.title";
     public static final String EXTRA_DURATION = "com.android.myplayer.MusicService.duration";
-    public static final String EXTRA_CURRENT_POSITION = "com.android.myplayer.MusicService.current_position";
+    
+    public static MusicService singleton;
     
     // The volume we set the media player to when we lose audio focus, but are allowed to reduce
     // the volume instead of stopping playback.
@@ -142,16 +129,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
 
     Notification mNotification = null;
     
-    private final Handler handler = new Handler();
-    private Intent seekIntent;
-    private Intent trackDataIntent;
-    public static final String ACTION_BROADCAST_SEEK = "com.android.myplayer.action.BROADCAST_SEEK";
-    public static final String ACTION_BROADCAST_TRACK_DATA = "com.android.myplayer.action.BROADCAST_TRACK_DATA";
-    
-    private boolean isSeekPosBroadcastReceiverRegistered = false;
-    private boolean isRepeatBroadcastReceiverRegistered = false;
-    private boolean isShuffleBroadcastReceiverRegistered = false;
-    
     /**
      * Makes sure the media player exists and has been reset. This will create the media player
      * if needed, or reset the existing media player if one already exists.
@@ -181,12 +158,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     public void onCreate() {
         Log.i(TAG, "debug: Creating service");
 
+        singleton = this;
+        
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 
-        seekIntent = new Intent(ACTION_BROADCAST_SEEK);
-        trackDataIntent = new Intent(ACTION_BROADCAST_TRACK_DATA);
-        
         // create the Audio Focus Helper, if the Audio Focus feature is available (SDK 8 or above)
         if (android.os.Build.VERSION.SDK_INT >= 8)
             mAudioFocusHelper = new AudioFocusHelper(getApplicationContext(), this);
@@ -196,71 +172,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         mDummyAlbumArt = BitmapFactory.decodeResource(getResources(), R.drawable.dummy_album_art);
     }
 
-    /**
-     * Called when we receive an Intent. When we receive an intent sent to us via startService(),
-     * this is the method that gets called. So here we react appropriately depending on the
-     * Intent's action, which specifies what is being requested of us.
-     */
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-    	Log.i(TAG, "Start");
-    	
-    	assertRegistered(seekPosBroadcastReceiver, PlayingActivity.ACTION_BROADCAST_SEEKBAR,
-    			isSeekPosBroadcastReceiverRegistered);
-    	assertRegistered(repeatBroadcastReceiver, PlayingActivity.ACTION_BROADCAST_REPEAT,
-    			isRepeatBroadcastReceiverRegistered);
-    	assertRegistered(shuffleBroadcastReceiver, PlayingActivity.ACTION_BROADCAST_SHUFFLE,
-    			isShuffleBroadcastReceiverRegistered);
-    	
-    	
-    	String action = intent.getAction();
-    	if (action.equals(ACTION_CHANGE_PLAYLIST)) processChangePlaylistRequest(intent.getExtras());
-    	else if (action.equals(ACTION_TOGGLE_PLAYBACK)) processTogglePlaybackRequest();
-        else if (action.equals(ACTION_PLAY)) processPlayRequest();
-        else if (action.equals(ACTION_PAUSE)) processPauseRequest();
-        else if (action.equals(ACTION_SKIP)) processSkipRequest();
-        else if (action.equals(ACTION_STOP)) processStopRequest();
-        else if (action.equals(ACTION_PREVIOUS)) processRewindRequest();
-        else if (action.equals(ACTION_FORWARD)) processForwardRequest();
-        else if (action.equals(ACTION_BACKWARD)) processBackwardRequest();
-
-        return START_NOT_STICKY; // Means we started the service, but don't want it to
-                                 // restart in case it's killed.
-    }
-    
-    private void assertRegistered(BroadcastReceiver r, String action, boolean isRegistered) {
-    	if (!isRegistered) {
-    		registerReceiver(r, new IntentFilter(action));
-    		isRegistered = true;
-    	}
-    }
-    
-    private void assertUnregistered(BroadcastReceiver r, boolean isRegistered) {
-    	if (isRegistered) {
-    		unregisterReceiver(r);
-    		isRegistered = false;
-    	}
-    }
-    
-    private void setupHandler() {
-    	Log.i("SETUP HANDLER", "go");
-    	handler.removeCallbacks(sendUpdatesToUI);
-    	handler.post(sendUpdatesToUI);
-    }
-    
-    private Runnable sendUpdatesToUI = new Runnable() {
-    	public void run() {
-    		sendUpdateToUI();
-    		handler.postDelayed(this, 1000);
-    	}
-    };
-
-    private void sendUpdateToUI() {
-    	seekIntent.putExtra(EXTRA_CURRENT_POSITION, mPlayer.getCurrentPosition());
-    	Log.i(TAG, "sending seek broadcast");
-		sendBroadcast(seekIntent);
-    }
-    
     void processChangePlaylistRequest(Bundle extras) {
     	Log.i(TAG, extras.getString(MediaProvider.FILTER));
     	playlist = new Playlist(getContentResolver(), extras);
@@ -284,8 +195,7 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         Log.i(TAG, "audio focus gained");
         // actually play the song
 
-        setupHandler();
-    	Log.i(TAG, "Handler set up");
+        Log.i(TAG, "Handler set up");
     	
         if (mState == State.Stopped) {
             // If we're stopped, just go ahead to the next song and start playing
@@ -358,34 +268,18 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         }
     }
 
-    private BroadcastReceiver repeatBroadcastReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			playlist.setRepeat(intent.getBooleanExtra(PlayingActivity.EXTRA_IS_REPEAT, false));
-		}
-	};
-	
-	private BroadcastReceiver shuffleBroadcastReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			playlist.setShuffle(intent.getBooleanExtra(PlayingActivity.EXTRA_IS_SHUFFLE, false));
-		}
-	};
-	
-	// --Receive seekbar position if it has been changed by the user in the
-	// activity
-	private BroadcastReceiver seekPosBroadcastReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			updateSeekPos(intent.getIntExtra(PlayingActivity.EXTRA_SEEKPOS, 0));
-		}
-	};
-
+    public void setRepeat(boolean b) {
+		playlist.setRepeat(b);
+	}
+    
+    public void setShuffle(boolean b) {
+    	playlist.setShuffle(b);
+    }
+    
 	// Update seek position
-	private void updateSeekPos(int position) {
+	public void updateSeekPos(int position) {
 		mPlayer.seekTo(position);
 		Log.i(TAG, "seeked");
-		sendUpdateToUI();
 	}
 	/**
      * Releases resources used by the service for playback. This includes the "foreground service"
@@ -396,8 +290,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
     void relaxResources(boolean releaseMediaPlayer) {
         // stop being a foreground service
         stopForeground(true);
-        
-        handler.removeCallbacks(sendUpdatesToUI);
         
         // stop and release the Media Player, if it's available
         if (releaseMediaPlayer && mPlayer != null) {
@@ -492,12 +384,6 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         mState = State.Playing;
         updateNotification(mSongTitle + " (playing)");
         
-        /* sending broadcast with track data */
-        trackDataIntent.putExtra(EXTRA_TITLE, mSongTitle);
-        trackDataIntent.putExtra(EXTRA_DURATION, mPlayer.getDuration());
-        sendBroadcast(trackDataIntent);
-        setupHandler();
-        
         configAndStartMediaPlayer();
     }
 
@@ -568,10 +454,8 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         mState = State.Stopped;
         relaxResources(true);
         giveUpAudioFocus();
-        handler.removeCallbacks(sendUpdatesToUI);
-        assertUnregistered(seekPosBroadcastReceiver, isSeekPosBroadcastReceiverRegistered);
-        assertUnregistered(repeatBroadcastReceiver, isRepeatBroadcastReceiverRegistered);
-        assertUnregistered(shuffleBroadcastReceiver, isShuffleBroadcastReceiverRegistered);
+        
+        singleton = null;
     }
 
     @Override

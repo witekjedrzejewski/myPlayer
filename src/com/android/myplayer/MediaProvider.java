@@ -57,6 +57,7 @@ public class MediaProvider {
 		}
 
 		public String getTitle() {
+			Log.i(TAG, id + " " + title);
 			return title;
 		}
 

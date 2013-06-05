@@ -1,7 +1,7 @@
 package com.android.myplayer;
 
-import list.ArtistsListActivity;
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidhive.musicplayer.R;
+import com.androidhive.musicplayer.R.id;
 
 public class PlayingActivity extends Activity implements OnSeekBarChangeListener {
 
@@ -27,6 +28,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 	private ImageButton btnNext;
 	private ImageButton btnPrevious;
 	private ImageButton btnPlaylist;
+	private ImageButton btnFlags;
 	private ImageButton btnRepeat;
 	private ImageButton btnShuffle;
 	private SeekBar songProgressBar;
@@ -40,52 +42,14 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 	
 	private Utilities utils;
 	
-	public final static String EXTRA_SEEKPOS = 
-			"com.android.myplayer.PlayingActivity.extra_seekpos";
-	public final static String EXTRA_IS_REPEAT = 
-			"com.android.myplayer.PlayingActivity.extra_is_repeat";
-	public final static String EXTRA_IS_SHUFFLE = 
-			"com.android.myplayer.PlayingActivity.extra_is_shuffle";
-	
-	public final static String ACTION_BROADCAST_SEEKBAR = 
-			"com.android.myplayer.PlayingActivity.action.broadcast_seekbar";
-	public final static String ACTION_BROADCAST_REPEAT = 
-			"com.android.myplayer.PlayingActivity.action.broadcast_repeat";
-	public final static String ACTION_BROADCAST_SHUFFLE = 
-			"com.android.myplayer.PlayingActivity.action.broadcast_shuffle";
-	
-	private Intent seekbarBroadcastIntent;
-	private Intent repeatBroadcastIntent;
-	private Intent shuffleBroadcastIntent;
-	
-	private boolean isSeekBroadcastReceiverRegistered = false;
-	
-	
-	private void startMusicAction(String action) {
-		Intent intent = new Intent(action);
-		startService(intent);
-	}
-	
-	private void registerSeekBroadcastReceiver() {
-		if (!isSeekBroadcastReceiverRegistered) {
-			isSeekBroadcastReceiverRegistered = true;
-			registerReceiver(broadcastSeekReceiver, 
-					new IntentFilter(MusicService.ACTION_BROADCAST_SEEK));
-		}
-		Log.i(TAG, "seekreceiver registered");
-	}
-	
-	private void unregisterSeekBroadcastReceiver() {
-		if (isSeekBroadcastReceiverRegistered) {
-			isSeekBroadcastReceiverRegistered = false;
-			unregisterReceiver(broadcastSeekReceiver);
-		}
-	}
-	
+	private MusicService service;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.player);
+		
+		setMusicService();
 		
 		// All player buttons
 		btnPlay = (ImageButton) findViewById(R.id.btnPlay);
@@ -94,6 +58,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 		btnNext = (ImageButton) findViewById(R.id.btnNext);
 		btnPrevious = (ImageButton) findViewById(R.id.btnPrevious);
 		btnPlaylist = (ImageButton) findViewById(R.id.btnPlaylist);
+		btnFlags = (ImageButton) findViewById(id.btnTag);
 		btnRepeat = (ImageButton) findViewById(R.id.btnRepeat);
 		btnShuffle = (ImageButton) findViewById(R.id.btnShuffle);
 		songProgressBar = (SeekBar) findViewById(R.id.songProgressBar);
@@ -103,13 +68,6 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 		
 		utils = new Utilities();
 		
-		seekbarBroadcastIntent = new Intent(ACTION_BROADCAST_SEEKBAR);
-		repeatBroadcastIntent = new Intent(ACTION_BROADCAST_REPEAT);
-		shuffleBroadcastIntent = new Intent(ACTION_BROADCAST_SHUFFLE);
-		
-		registerReceiver(broadcastTrackDataReceiver, new IntentFilter(MusicService.ACTION_BROADCAST_TRACK_DATA));
-		registerSeekBroadcastReceiver();
-		
 		// Listeners
 		songProgressBar.setOnSeekBarChangeListener(this);
 		
@@ -118,14 +76,12 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 			@Override
 			public void onClick(View arg0) {
 				Log.i(TAG, "button play clicked");
-				startMusicAction(MusicService.ACTION_TOGGLE_PLAYBACK);
+				service.processTogglePlaybackRequest();
 				if (isPlaying) {
 					isPlaying = false;
-					//unregisterSeekBroadcastReceiver();
 					btnPlay.setImageResource(R.drawable.btn_play);
 				} else {
 					isPlaying = true;
-					//registerSeekBroadcastReceiver();
 					btnPlay.setImageResource(R.drawable.btn_pause);
 				}
 			}
@@ -135,7 +91,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 			
 			@Override
 			public void onClick(View arg0) {
-				startMusicAction(MusicService.ACTION_FORWARD);
+				service.processForwardRequest();
 			}
 		});
 		
@@ -143,7 +99,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 			
 			@Override
 			public void onClick(View arg0) {
-				startMusicAction(MusicService.ACTION_BACKWARD);
+				service.processBackwardRequest();
 			}
 		});
 		
@@ -151,7 +107,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 			
 			@Override
 			public void onClick(View arg0) {
-				startMusicAction(MusicService.ACTION_SKIP);	
+				service.processSkipRequest();
 			}
 		});
 		
@@ -159,7 +115,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 			
 			@Override
 			public void onClick(View arg0) {
-				startMusicAction(MusicService.ACTION_PREVIOUS);
+				service.processRewindRequest();
 			}
 		});
 		
@@ -181,8 +137,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 					btnRepeat.setImageResource(R.drawable.btn_repeat_focused);
 					btnShuffle.setImageResource(R.drawable.btn_shuffle);
 				}
-				repeatBroadcastIntent.putExtra(EXTRA_IS_REPEAT, isRepeat);
-				sendBroadcast(repeatBroadcastIntent);
+				service.setRepeat(isRepeat);
 			}
 		});
 		
@@ -203,8 +158,7 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 					btnShuffle.setImageResource(R.drawable.btn_shuffle_focused);
 					btnRepeat.setImageResource(R.drawable.btn_repeat);
 				}
-				shuffleBroadcastIntent.putExtra(EXTRA_IS_SHUFFLE, isShuffle);
-				sendBroadcast(shuffleBroadcastIntent);
+				service.setShuffle(isShuffle);
 			}
 		});
 		
@@ -217,63 +171,68 @@ public class PlayingActivity extends Activity implements OnSeekBarChangeListener
 			}
 		});
 		
-    	Intent intent = new Intent(MusicService.ACTION_CHANGE_PLAYLIST);
-    	Log.i(TAG, getIntent().getExtras().toString());
-    	Log.i(TAG, getIntent().getExtras().getString(MediaProvider.FILTER));
-    	intent.putExtras(getIntent().getExtras());
-    	startService(intent);
+		btnFlags.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				FlagDialogFragment dialog = new FlagDialogFragment();
+			    dialog.show(getFragmentManager(), "abc");
+			}
+		});
 		
+		Log.i(TAG, getIntent().getExtras().toString());
+    	Log.i(TAG, getIntent().getExtras().getString(MediaProvider.FILTER));
+    	
+    	service.processChangePlaylistRequest(getIntent().getExtras());
+	}
+	
+	private void setMusicService() {
+		startService(new Intent(this, MusicService.class));
+		try { Thread.sleep(1000); } catch(InterruptedException e) {}
 	}
 
-	private BroadcastReceiver broadcastTrackDataReceiver = new BroadcastReceiver() {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
+	private class TrackDataReceiver {
+		public void onReceive(Bundle extras) {
 			Log.i(TAG, "TrackData onReceive()");
-			String title = intent.getStringExtra(MusicService.EXTRA_TITLE);
-			int duration = intent.getIntExtra(MusicService.EXTRA_DURATION, 0);
+			String title = extras.getString(MusicService.EXTRA_TITLE);
+			int duration = extras.getInt(MusicService.EXTRA_DURATION, 0);
 			songTitleLabel.setText(title);
 			songProgressBar.setMax(duration);
 			songTotalDurationLabel.setText(""+utils.milliSecondsToTimer(duration));
 			
 			btnPlay.setImageResource(R.drawable.btn_pause);
 		}
-		
-	};
-
+	}
+	
+	/*
 	private BroadcastReceiver broadcastSeekReceiver = new BroadcastReceiver() {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Log.i(TAG, "Seek onReceive()");
+			//Log.i(TAG, "Seek onReceive()");
 			int currentPosition = intent.getIntExtra(MusicService.EXTRA_CURRENT_POSITION, 0);
 			songProgressBar.setProgress(currentPosition);
 			songCurrentDurationLabel.setText(""+utils.milliSecondsToTimer(currentPosition));
 		}
 		
 	};
-	
+	*/
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromTouch) {
 	}
 
 	@Override
 	public void onStartTrackingTouch(SeekBar seekBar) {
-		unregisterSeekBroadcastReceiver();
     }
 
 	@Override
     public void onStopTrackingTouch(SeekBar seekBar) {
 		int seekPos = seekBar.getProgress();
-		seekbarBroadcastIntent.putExtra(EXTRA_SEEKPOS, seekPos);
-		registerSeekBroadcastReceiver(); //order important - we wait for UI update
-		sendBroadcast(seekbarBroadcastIntent);
+		service.updateSeekPos(seekPos);
     }
 	
 	@Override
 	public void onStop() {
-		unregisterSeekBroadcastReceiver();
-		unregisterReceiver(broadcastTrackDataReceiver);
 		super.onStop();
 	}
 }

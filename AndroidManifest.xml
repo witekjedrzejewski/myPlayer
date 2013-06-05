@@ -5,8 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk 
-        android:minSdkVersion="7"  
-        android:targetSdkVersion="10" />
+        android:minSdkVersion="11"  
+        android:targetSdkVersion="17" />
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -62,19 +62,6 @@
         <service
             android:name="com.android.myplayer.MusicService"
             android:exported="false" >
-            <intent-filter>
-                <action android:name="com.android.myplayer.action.CHANGE_PLAYLIST" />
-                <action android:name="com.android.myplayer.action.TOGGLE_PLAYBACK" />
-                <action android:name="com.android.myplayer.action.PLAY" />
-                <action android:name="com.android.myplayer.action.PAUSE" />
-                <action android:name="com.android.myplayer.action.SKIP" />
-                <action android:name="com.android.myplayer.action.PREVIOUS" />
-                <action android:name="com.android.myplayer.action.STOP" />
-                <action android:name="com.android.myplayer.action.FORWARD" />
-                <action android:name="com.android.myplayer.action.BACKWARD" />
-                <action android:name="com.android.myplayer.action.BROADCAST_SEEK" />
-                <action android:name="com.android.myplayer.action.BROADCAST_TRACK_DATA" />
-            </intent-filter>
         </service>
 
         <activity

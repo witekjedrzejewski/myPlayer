@@ -1,9 +1,7 @@
 package list;
 
-import com.android.myplayer.MediaProvider;
 import com.android.myplayer.PlayingActivity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.provider.MediaStore.Audio;
 import android.util.Log;
