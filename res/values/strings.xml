@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, AndroidBuildingMusicPlayerActivity!</string>
-    <string name="app_name">AndroidBuildingMusicPlayer</string>
+    <string name="app_name">Smart Player</string>
     <string name="title_activity_artists_list">ArtistsListActivity</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
@@ -10,13 +9,17 @@
     <string name="title_activity_items_list">ItemsListActivity</string>
     <string name="title_activity_categories_list">CategoriesListActivity</string>
     <string name="title_activity_songs_list">Songs List</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Chujnia</string>
     <string name="title_activity_artists_songs_list">ArtistsSongsListActivity</string>
     <string name="title_activity_all_albums_list">AllAlbumsListActivity</string>
     <string name="title_activity_all_songs_list">All songs</string>
     <string name="title_activity_albums_from_artist_list">Artist\'s albums</string>
     <string name="title_activity_songs_from_artist_list">Artist\'s songs</string>
     <string name="title_activity_songs_from_album_list">Songs from album</string>
-	<string name="title_activity_from_artist_tab">Artist view</string>
+    <string name="title_activity_from_artist_tab">Artist view</string>
+    <string name="title_flags_dialog_fragment">Select shuffle mode</string>
+    <string name="flags_dialog_ok">OK</string>
+    <string name="flags_dialog_cancel">Cancel</string>
     
+
 </resources>

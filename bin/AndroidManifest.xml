@@ -1,89 +1,93 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.androidhive.musicplayer"
+    package="com.example.newplayer"
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk 
-        android:minSdkVersion="7"  
-        android:targetSdkVersion="10" />
+    <uses-sdk
+        android:minSdkVersion="11"
+        android:targetSdkVersion="17" />
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+    <uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
+    
     <application
+        android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name" >
-        <activity
-            android:name="com.android.myplayer.PlayingActivity"
-            android:configChanges="keyboardHidden|orientation"
-            android:label="@string/app_name" >
-        </activity>
-        <activity android:name="com.android.myplayer.PlayListActivity" />
-        <activity
-            android:name="list.ArtistsListActivity"
-            android:label="@string/title_activity_artists_list" >
-
-        </activity>
-        <activity
-            android:name="list.AllAlbumsListActivity"
-            android:label="@string/title_activity_all_albums_list" >
-        </activity>
-        <activity
-            android:name="list.AllSongsListActivity"
-            android:label="@string/title_activity_all_songs_list" >
-        </activity>
-        <activity
-            android:name="list.AlbumsFromArtistListActivity"
-            android:label="@string/title_activity_albums_from_artist_list" >
-        </activity>
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
         
+        <service android:name=".MusicService"
+            android:exported="false">
+        	<intent-filter>
+                <action android:name="com.example.newplayer.action.CHANGE_PLAYLIST" />
+                <action android:name="com.example.newplayer.action.TOGGLE_PLAYBACK" />
+                <action android:name="com.example.newplayer.action.PLAY" />
+                <action android:name="com.example.newplayer.action.PAUSE" />
+                <action android:name="com.example.newplayer.action.SKIP" />
+                <action android:name="com.example.newplayer.action.PREVIOUS" />
+                <action android:name="com.example.newplayer.action.STOP" />
+                <action android:name="com.example.newplayer.action.FORWARD" />
+                <action android:name="com.example.newplayer.action.BACKWARD" />
+                <action android:name="com.example.newplayer.action.BROADCAST_SEEK" />
+                <action android:name="com.example.newplayer.action.BROADCAST_TRACK_DATA" />
+            </intent-filter>
+        </service>
         <activity
-            android:name="list.SongsFromArtistListActivity"
-            android:label="@string/title_activity_songs_from_artist_list" >
-        </activity>
-        
-        <activity
-            android:name="list.SongsFromAlbumListActivity"
-            android:label="@string/title_activity_songs_from_album_list" >
-        </activity>
-        <activity
-            android:name="com.android.myplayer.FromArtistTabActivity"
-            android:label="@string/title_activity_from_artist_tab" >
-        </activity>
-        <activity
-            android:name="com.android.myplayer.MainActivity"
-            android:label="@string/title_activity_main"
+            android:name=".MainActivity"
+            android:label="@string/app_name"
             android:theme="@android:style/Theme.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>  
         </activity>
-        <service
-            android:name="com.android.myplayer.MusicService"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.android.myplayer.action.CHANGE_PLAYLIST" />
-                <action android:name="com.android.myplayer.action.TOGGLE_PLAYBACK" />
-                <action android:name="com.android.myplayer.action.PLAY" />
-                <action android:name="com.android.myplayer.action.PAUSE" />
-                <action android:name="com.android.myplayer.action.SKIP" />
-                <action android:name="com.android.myplayer.action.PREVIOUS" />
-                <action android:name="com.android.myplayer.action.STOP" />
-                <action android:name="com.android.myplayer.action.FORWARD" />
-                <action android:name="com.android.myplayer.action.BACKWARD" />
-                <action android:name="com.android.myplayer.action.BROADCAST_SEEK" />
-                <action android:name="com.android.myplayer.action.BROADCAST_TRACK_DATA" />
-            </intent-filter>
-        </service>
-
+        
         <activity
-            android:name="com.androidhive.musicplayer.ArtistsSongsListActivity"
-            android:label="@string/title_activity_artists_songs_list" >
+            android:name=".PlayingActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoTitleBar">
         </activity>
+        
         <activity
-            android:name="com.androidhive.musicplayer.AllAlbumsListActivity"
-            android:label="@string/title_activity_all_albums_list" >
+            android:name=".ArtistsListActivity"
+            android:label="@string/title_activity_artists_list" 
+            android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+        
+        <activity
+            android:name=".AllAlbumsListActivity"
+            android:label="@string/title_activity_all_albums_list"
+            android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+        
+        <activity
+            android:name=".AllSongsListActivity"
+            android:label="@string/title_activity_all_songs_list"
+            android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+        
+        <activity
+            android:name=".AlbumsFromArtistListActivity"
+            android:label="@string/title_activity_albums_from_artist_list"
+            android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+        
+        <activity
+            android:name=".SongsFromArtistListActivity"
+            android:label="@string/title_activity_songs_from_artist_list"
+            android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+        
+        <activity
+            android:name=".SongsFromAlbumListActivity"
+            android:label="@string/title_activity_songs_from_album_list" 
+            android:theme="@android:style/Theme.NoTitleBar">
+        </activity>
+        
+        <activity
+            android:name=".FromArtistTabActivity"
+            android:label="@string/title_activity_from_artist_tab"
+            android:theme="@android:style/Theme.NoTitleBar">
         </activity>
     </application>
 
